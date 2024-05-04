@@ -1,113 +1,145 @@
-import Image from "next/image";
+'use client'
+import { useState } from 'react';
+import { Button, Input, VStack, Center, Text, Heading, FormControl, FormLabel, useToast, Box } from "@chakra-ui/react";
+import NavBar from '@/components/NavBar';
+import { useRouter } from 'next/navigation';
+import {useAuthState, useSignInWithEmailAndPassword} from 'react-firebase-hooks/auth'
+import { auth, db } from '@/utils/firebase/client';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+
 
 export default function Home() {
+  const [loading, setLoading] = useState(false);
+  const toast = useToast();
+  const router = useRouter()
+  const [user] = useAuthState(auth);
+  const userSession = sessionStorage.getItem('user');
+  const [signInWithEmailAndPassword] = useSignInWithEmailAndPassword(auth);
+
+  if (user && userSession){
+    router.push('/admin/analiticas')
+    return null
+  }
+
+  const checkClientExists = async ({ db, email }): Promise<boolean> => {
+    const clientsQuery = query(collection(db, 'clients'), where('email', '==', email));
+    const querySnapshot = await getDocs(clientsQuery);
+    return querySnapshot.size > 0;
+  };
+
+  const checkProviderExists = async ({ db, email }): Promise<boolean> => {
+    const clientsQuery = query(collection(db, 'providers'), where('email', '==', email));
+    const querySnapshot = await getDocs(clientsQuery);
+    return querySnapshot.size > 0;
+  };
+
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    setLoading(true);
+
+    const formData = new FormData(event.target);
+
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+    try {
+      const clientRole =  await checkClientExists({db, email});
+      if(clientRole){
+        throw Error('No tienes Accesso')
+      }
+
+      const providerRole = await checkProviderExists({db, email})
+      if(providerRole){
+        console.log('role provider')
+        sessionStorage.setItem('role','provider')
+      }else{
+        console.log('role admin')
+        sessionStorage.setItem('role','admin')
+      }
+
+      const res = await signInWithEmailAndPassword(email, password);
+      sessionStorage.setItem('user', 'true')
+      toast({
+        title: 'Login Exitoso',
+        description: 'Bienvenido',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+        position: 'top-right'
+      });
+      router.replace('/admin/analiticas')
+    } catch (error) {
+      sessionStorage.removeItem('role')
+      let errorMessage = 'Error de autenticación';
+      if (!error.message.includes('Invalid login credentials')) {
+        errorMessage = error.message;
+      }
+
+      toast({
+        title: 'Error',
+        description: errorMessage,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+        position: 'top-right'
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:size-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
+    <>
+      <NavBar />
+      <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-white w-full">
+        <VStack
+          spacing={4}
+          p={10}
+          rowGap={10}
+          boxShadow="lg"
+          borderRadius="lg"
+          width={['90%', '70%', '50%', '30%']}
+          as="form"
+          onSubmit={handleSubmit}
+        >
+          <Heading textAlign={'center'} size={'lg'}>
+            Bienvenido al Administrador
+          </Heading>
+          <FormControl isRequired>
+            <FormLabel>Email</FormLabel>
+            <Input 
+              name="email"
+              placeholder="Ingrese su email"
+              variant="outline"
+              type="email"
             />
-          </a>
-        </div>
-      </div>
+          </FormControl>
+          <FormControl isRequired>
+            <FormLabel>Password</FormLabel>
+            <Input
+              name="password"
+              placeholder="Ingrese su contraseña"
+              variant="outline"
+              type="password"
+            />
+          </FormControl>
+          <Button
+            colorScheme="yellow"
+            width="full"
+            isLoading={loading}
+            type="submit"
+            name="login"
+          >
+            Iniciar Sesión
+          </Button>
 
-      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[300px] before:w-full before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 sm:before:w-[480px] sm:after:w-[240px] before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
 
-      <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-balance text-sm opacity-50">
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+          <span>Te olvidaste?
+            <a href="/signup" className="text-blue-700 hover:text-blue-400"> Recuperar Contrasena</a>
+          </span>
+        </VStack>
+      </main>
+    </>
   );
 }
