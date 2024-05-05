@@ -84,7 +84,7 @@ const FixedAvailability = () => {
         </HStack>
       </RadioGroup>
       <HStack spacing={4} align="top" width="100%">
-        <CheckboxGroup colorScheme="yellow" onChange={handleDayChange} value={days} width="50%">
+        <CheckboxGroup colorScheme="yellow" onChange={handleDayChange} value={days}>
           <Stack direction="column" spacing={2}>
             {daysOfWeek.map(day => (
               <Checkbox key={day} value={day}>{day}</Checkbox>

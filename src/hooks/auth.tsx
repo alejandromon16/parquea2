@@ -1,30 +1,42 @@
-import { useEffect, useState } from "react";
-import { User as FirebaseUser, signOut as firebaseSignOut, browserLocalPersistence, browserSessionPersistence, setPersistence, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
-import { auth } from "@/utils/firebase/client";
+'use client'
+import { useState, useEffect } from "react";
 
-export async function signIn(email: string, password: string, rememberMe: boolean = true) {
-  await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
-  return signInWithEmailAndPassword(auth, email, password);
+// Define interfaces for the hook's return values
+interface AuthState {
+  isAuthenticated: boolean;
+  role: UserRole | null;
 }
 
-export async function signOut() {
-  return firebaseSignOut(auth);
+interface AuthActions {
+  setIsAuthenticated: (isAuthenticated: boolean) => void;
+  setRole: (role: UserRole | null) => void;
 }
 
-export function useUser() {
-  const [user, setUser] = useState<FirebaseUser | null | false>(false);
-  const [loading, setLoading] = useState(true);
+type UserRole = 'provider' | 'admin';
 
+// Combined interface for ease of use in components
+interface UseAuth extends AuthState, AuthActions {}
+
+// Custom hook to manage user authentication and role
+export function useAuth(): UseAuth {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [role, setRole] = useState<UserRole | null>(null);
+
+  // Load the authentication status and role from localStorage when the component mounts
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);  
-    });
-
-    return () => {
-      unsubscribe();
-    };
+    const savedAuth = window.sessionStorage.getItem("isAuthenticated");
+    const savedRole = window.sessionStorage.getItem("role");
+    setIsAuthenticated(savedAuth === 'true');
+    setRole(savedRole as UserRole | null);
   }, []);
 
-  return { user, loading }; 
+  // Save the authentication status and role to localStorage whenever they change
+  useEffect(() => {
+    window.sessionStorage.setItem("isAuthenticated", isAuthenticated.toString());
+    if (role) {
+      window.sessionStorage.setItem("role", role);
+    }
+  }, [isAuthenticated, role]);
+
+  return { isAuthenticated, setIsAuthenticated, role, setRole };
 }

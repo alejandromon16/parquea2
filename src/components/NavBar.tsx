@@ -1,18 +1,15 @@
 'use client'
-import { signOut, useUser } from '@/hooks/auth';
 import { auth } from '@/utils/firebase/client';
 import { Button } from '@chakra-ui/react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 
 
-const NavBar = () => {
+const NavBar = ({role}) => {
   const router = useRouter()
   const [user] = useAuthState(auth);
-  const userSession = sessionStorage.getItem('user');
-  const role = sessionStorage.getItem('role')
   
   const isActive = (path: string) => {
     return typeof window !== "undefined" ? window.location.pathname.includes(path) : false;
@@ -31,7 +28,7 @@ const NavBar = () => {
           
             <div className='hidden md:flex gap-6'>
 
-              {user && (role === 'admin' || role === 'provider') && (
+              {(role == "admin"|| role == "provider") && (
                 <>
                   <a href='/admin/analiticas' className={`hover:bg-gray-100 p-2 rounded-md cursor-pointer transition-all ${isActive('/admin/analiticas') ? 'bg-gray-200' : ''}`}>
                     Analiticas
@@ -39,17 +36,19 @@ const NavBar = () => {
                   <a href='/admin/parqueos' className={`hover:bg-gray-100 p-2 rounded-md cursor-pointer transition-all ${isActive('/admin/parqueos') ? 'bg-gray-200' : ''}`}>
                     Garajes
                   </a>
+
+                  <a href='/admin/negociaciones' className={`hover:bg-gray-100 p-2 rounded-md cursor-pointer transition-all ${isActive('/admin/negociaciones') ? 'bg-gray-200' : ''}`}>
+                    Negociaciones
+                  </a>
+
+                  <a href='/admin/reservas' className={`hover:bg-gray-100 p-2 rounded-md cursor-pointer transition-all ${isActive('/admin/reservas') ? 'bg-gray-200' : ''}`}>
+                    Reservas
+                  </a>
                 </>
               )}
               
-              {user && role === 'admin' && (
+              {role === "admin" && (
                 <>
-                <a href='/admin/negociaciones' className={`hover:bg-gray-100 p-2 rounded-md cursor-pointer transition-all ${isActive('/admin/negociaciones') ? 'bg-gray-200' : ''}`}>
-                  Negociaciones
-                </a>
-                <a href='/admin/reservas' className={`hover:bg-gray-100 p-2 rounded-md cursor-pointer transition-all ${isActive('/admin/reservas') ? 'bg-gray-200' : ''}`}>
-                  Reservas
-                </a>
                 <a href='/admin/ofertantes' className={`hover:bg-gray-100 p-2 rounded-md cursor-pointer transition-all ${isActive('/admin/ofertantes') ? 'bg-gray-200' : ''}`}>
                   Ofertantes
                 </a>
@@ -65,7 +64,7 @@ const NavBar = () => {
               sessionStorage.removeItem('role')
               sessionStorage.removeItem('user')
               sessionStorage.clear()
-              signOut()
+              auth.signOut()
               router.replace('/')
             }}>Logout</Button>)}
           </div>

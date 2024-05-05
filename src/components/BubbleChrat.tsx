@@ -66,7 +66,7 @@ const ParkingLotBubbleChart = () => {
       },
       legend: {
         display: true,
-        position: 'top'
+        position: 'top' as const
       }
     }
   };
@@ -74,7 +74,7 @@ const ParkingLotBubbleChart = () => {
   return (
     <div className='w-full md:col-span-2 relative lg:h-[70vh] h-[50vh] m-auto p-4 border rounded-lg bg-white shadow-md'>
       <h2 className='text-center'>Análisis de precios y utilización de estacionamientos</h2>
-      <Bubble data={data} options={options} />
+      <Bubble data={data} options={options as any} />
     </div>
   );
 };

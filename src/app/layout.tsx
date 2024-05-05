@@ -2,7 +2,7 @@
 import './globals.css'
 import type { Metadata } from 'next'
 import { Inter,Outfit } from 'next/font/google'
-import NavBar from '@/components/NavBar'
+// import NavBar from '@/components/NavBar'
 import { Providers } from '@/providers/chakra.provider'
 
 
@@ -17,13 +17,12 @@ export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
-}) {
-  
+}) {  
   return (
     <html lang="en">
       <body className={outfit.className}>
         <Providers>
-           <NavBar />
+           {/* <NavBar role={role}/> */}
             {children}
         </Providers>
         </body>

@@ -8,7 +8,7 @@ import { db } from "@/utils/firebase/client";
 import { collection, query, where } from "firebase/firestore";
 import { useCollection } from 'react-firebase-hooks/firestore';
 
-const ofertantes = () => {
+const Clientes = () => {
   const itemVariants = {
     initial: { opacity: 0, y: 50 },
     animate: { opacity: 1, y: 0 },
@@ -97,4 +97,4 @@ const ofertantes = () => {
   );
 };
 
-export default ofertantes;
+export default Clientes;

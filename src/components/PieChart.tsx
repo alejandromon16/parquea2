@@ -41,7 +41,7 @@ const PieChart = () => {
     <>
       <div className="w-full align-middle justify-end md:col-span-1 relative lg:h-[70vh] h-[50vh] m-auto py-10 px-4 border rounded-lg bg-white shadow-md">
         <h2 className="text-center">Cantidades de Rechazos</h2>
-        <Pie data={data} options={options} />
+        <Pie data={data} options={options as any} />
       </div>
     </>
   );

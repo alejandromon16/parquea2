@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { collection, query } from "firebase/firestore";
 import { useCollection } from "react-firebase-hooks/firestore";
 import { db } from "@/utils/firebase/client";
-const ofertantes = () => {
+const Ofertantes = () => {
   const itemVariants = {
     initial: { opacity: 0, y: 50 },
     animate: { opacity: 1, y: 0 },
@@ -89,4 +89,4 @@ const ofertantes = () => {
   );
 };
 
-export default ofertantes;
+export default Ofertantes;

@@ -49,8 +49,7 @@ const ImageDropzone: React.FC = () => {
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: 'image/jpeg, image/png',
-    multiple: false
+    multiple: false,
   });
 
   return (

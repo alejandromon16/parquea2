@@ -7,7 +7,7 @@ import { useCollection } from 'react-firebase-hooks/firestore';
 import CollapsibleComponent from '@/components/Collapsible';
 
 
-function ClientPage() {
+function Negociaciones() {
   const offersQuery = query(collection(db, 'offers'));
   const [offers, offersLoading, error] = useCollection(offersQuery, {
     snapshotListenOptions: { includeMetadataChanges: true },
@@ -90,4 +90,4 @@ function ClientPage() {
   );
 }
 
-export default ClientPage;
+export default Negociaciones;

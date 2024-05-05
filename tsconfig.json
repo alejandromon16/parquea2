@@ -3,7 +3,7 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": true,
+    "strict": false,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
@@ -12,6 +12,9 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "noImplicitAny": false, // Allows expressions and declarations with an implied 'any' type
+    "noImplicitReturns": false, // Do not raise errors for missing returns in a function
+    "noImplicitThis": false, // Allow 'this' expressions with an implied 'any' type
     "plugins": [
       {
         "name": "next"

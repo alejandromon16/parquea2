@@ -4,10 +4,12 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from 'framer-motion';
 import CreateParkingForm from "@/components/NewParkingForm";
 import ParkingDetailsModal from "@/components/ParkingDetailsModal";
-import { db } from "@/utils/firebase/client";
-import { collection, query } from "firebase/firestore";
+import { auth, db } from "@/utils/firebase/client";
+import { collection, DocumentData, Query, query, where } from "firebase/firestore";
 import { useCollection } from "react-firebase-hooks/firestore";
 import { ParkingCard } from "@/components/ParkingCard";
+import { useAuth } from "@/hooks/auth";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 const ParkingList = ({ parqueos, onCardClick, searchQuery }) => {
   const fadeIn = {
@@ -57,14 +59,26 @@ const ParkingList = ({ parqueos, onCardClick, searchQuery }) => {
   );
 };
 
-const Page = () => {
+const Parking = () => {
   const [selectedParking, setSelectedParking] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showList, setShowList] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const role = sessionStorage.getItem('role');
+  const [user] = useAuthState(auth)
+  const { role } = useAuth() || {};
 
-  const garagesQuery = query(collection(db, 'garages'));
+
+
+  let garagesQuery: Query<DocumentData, DocumentData>;
+  if (role === "provider" && user) {
+    garagesQuery = query(
+      collection(db, "garages"),
+      where("userId", "==", user.uid)
+    );
+  } else {
+    garagesQuery = query(collection(db, "garages"));
+  }
+
   const [garages, garagesLoading, error] = useCollection(garagesQuery);
 
   const handleParkingClick = (parking) => {
@@ -130,4 +144,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default Parking;

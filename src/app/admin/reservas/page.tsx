@@ -1,15 +1,30 @@
 "use client";
 import { useCollection } from "react-firebase-hooks/firestore";
-import { collection, query } from "firebase/firestore";
-import { db } from "@/utils/firebase/client";
+import { collection, DocumentData, Query, query, where } from "firebase/firestore";
+import { auth, db } from "@/utils/firebase/client";
 import DataTable from "@/components/Reservations/datatable";
 import ReservationModal from "@/components/Reservations/ViewDetailsModal";
 import { useState } from "react";
+import { useAuth } from "@/hooks/auth";
+import { useAuthState } from "react-firebase-hooks/auth";
 
-const Ofertantes = () => {
+const Reservas = () => {
   const [selectedReservation, setSelectedReservation] = useState(null)
   const [isModalOpen, setModalOpen] = useState(false);
-  const reservationsQuery = query(collection(db, 'reservations'));
+  const [user] = useAuthState(auth)
+  const { role } = useAuth() || {};
+
+  let reservationsQuery: Query<DocumentData, DocumentData>;
+  if (role === "provider" && user) {
+    reservationsQuery = query(
+      collection(db, "reservations"),
+      where("provider.id", "==", user.uid)
+    );
+  } else {
+    reservationsQuery = query(collection(db, "reservations"));
+  }
+
+  
   const [reservations, reservationsLoading, error] = useCollection(reservationsQuery, {
     snapshotListenOptions: { includeMetadataChanges: true },
   });
@@ -43,4 +58,4 @@ const Ofertantes = () => {
   );
 };
 
-export default Ofertantes;
+export default Reservas;

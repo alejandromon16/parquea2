@@ -12,7 +12,7 @@ import { motion } from 'framer-motion';
 import PieChart from '@/components/PieChart';
 import ParkingLotBubbleChart from '@/components/BubbleChrat';
 
-const page = () => {
+const Analiticas = () => {
   const fadeIn = {
     initial: { opacity: 0 },
     animate: (custom: number) => ({
@@ -47,4 +47,4 @@ const page = () => {
   );
 }
 
-export default page;
+export default Analiticas;

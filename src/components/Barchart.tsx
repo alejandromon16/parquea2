@@ -8,6 +8,7 @@ import {
   Title,
   Tooltip,
   Legend,
+  ChartOptions,
 } from 'chart.js';
 
 ChartJS.register(
@@ -20,12 +21,13 @@ ChartJS.register(
 );
 
 const BarChart = () => {
-  const [chartData, setChartData] = useState({
+  const [chartData, setChartData] = useState<any>({
+    labels: [],
     datasets: [],
   });
 
-  const [chartOptions, setChartOptions] = useState({});
-  const [viewType, setViewType] = useState('daily'); // 'daily' or 'hourly'
+  const [chartOptions, setChartOptions] = useState<any>({});
+  const [viewType, setViewType] = useState('daily');
 
   useEffect(() => {
     if (viewType === 'daily') {

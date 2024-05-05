@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import {useAuthState, useSignInWithEmailAndPassword} from 'react-firebase-hooks/auth'
 import { auth, db } from '@/utils/firebase/client';
 import { collection, getDocs, query, where } from 'firebase/firestore';
+import { useAuth } from '@/hooks/auth';
 
 
 export default function Home() {
@@ -13,10 +14,10 @@ export default function Home() {
   const toast = useToast();
   const router = useRouter()
   const [user] = useAuthState(auth);
-  const userSession = sessionStorage.getItem('user');
   const [signInWithEmailAndPassword] = useSignInWithEmailAndPassword(auth);
+  const {isAuthenticated, setIsAuthenticated, setRole, role} = useAuth();
 
-  if (user && userSession){
+  if (isAuthenticated && user){
     router.push('/admin/analiticas')
     return null
   }
@@ -52,14 +53,14 @@ export default function Home() {
       const providerRole = await checkProviderExists({db, email})
       if(providerRole){
         console.log('role provider')
-        sessionStorage.setItem('role','provider')
+        setRole('provider')
       }else{
         console.log('role admin')
-        sessionStorage.setItem('role','admin')
+        setRole('admin')
       }
 
       const res = await signInWithEmailAndPassword(email, password);
-      sessionStorage.setItem('user', 'true')
+      setIsAuthenticated(true)
       toast({
         title: 'Login Exitoso',
         description: 'Bienvenido',
@@ -70,7 +71,7 @@ export default function Home() {
       });
       router.replace('/admin/analiticas')
     } catch (error) {
-      sessionStorage.removeItem('role')
+      setIsAuthenticated(false)
       let errorMessage = 'Error de autenticación';
       if (!error.message.includes('Invalid login credentials')) {
         errorMessage = error.message;
@@ -91,7 +92,7 @@ export default function Home() {
 
   return (
     <>
-      <NavBar />
+      <NavBar role={role} />
       <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-white w-full">
         <VStack
           spacing={4}
